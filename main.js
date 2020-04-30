@@ -6,11 +6,9 @@ console.log(w,h);
 var n =15;
 var atlama = h/n;
 
-
 var player = "oyuncu1"
 
 var table = Create2dArray(n)
-
 
 function Create2dArray(n){
         var arr = [];
@@ -55,10 +53,10 @@ function fillTable(x,y){
     ctx.stroke();
 }
 
+
+
+
 canvas.onmousedown = function (e){
-    // console.log(e)
-    // let xCord = Math.round((e.clientX - atlama/2) / atlama );
-    // let yCord = Math.round((e.clientY - atlama/2)/ atlama );
 
     let xCord = Math.floor(e.clientX / w * n);
     let yCord = Math.floor(e.clientY / h * n);
@@ -66,9 +64,8 @@ canvas.onmousedown = function (e){
     if(table[xCord][yCord] == null)
     {  
         fillTable(xCord,yCord)
-        
+        conn.send(JSON.stringify([xCord, yCord]));
         table[xCord][yCord] = player
-        // console.log("Winner",isAnyOneWin(xCord,yCord))
         if(isAnyOneWin(xCord,yCord)){
             alert(player + " oyuncusu kazandi");
             window.location = window.location
@@ -82,10 +79,6 @@ canvas.onmousedown = function (e){
         }
     }
 }
-
-// fillTable(3,5)
-// fillTable(4,6)
-// fillTable(n-1,n-1)
 
 function fillControl(x,y){
     let xCord = x * atlama + atlama/2;
@@ -170,8 +163,53 @@ function isAnyOneWin(xCord,yCord){
     return null;
 }
 
-function startGame(){
-    //While kazanan olana kadar 
-        // Ilk hamle kullanici
-        // AI minimax ile hamlesini gerceklestirecek.
+var conn;
+
+var peer = new Peer(null, {
+    debug: 2
+});
+
+peer.on('open', function (id) {
+    console.log('ID: ' + peer.id);
+    document.getElementsByTagName("input")[0].value = peer.id;
+});
+
+
+function connect(){
+    console.log(document.getElementsByTagName("input")[0].value);
+    conn = peer.connect(document.getElementsByTagName("input")[0].value);
+   
+    ready();
 }
+
+peer.on('connection', function (c) {
+    // Allow only a single connection
+    conn = c;
+    console.log("Connected to: " + conn.peer);
+    ready();
+});
+
+function ready(){
+    conn.on('data', function(data){
+        // Will print 'hi!'
+        data = JSON.parse(data)
+        console.log(data);
+        let xCord = data[0]
+        let yCord = data[1]
+        console.log(xCord,yCord);
+        fillTable(xCord,yCord)
+        table[xCord][yCord] = player
+        if(isAnyOneWin(xCord,yCord)){
+            alert(player + " oyuncusu kazandi");
+            window.location = window.location
+        }
+        console.log(table[xCord][yCord])
+        if(player == "oyuncu1"){
+            player = "oyuncu2";
+        }
+        else {
+            player = "oyuncu1";
+        }
+    });
+}
+
