@@ -73,7 +73,7 @@ canvas.onmousedown = function (e) {
 
         player = "AI";
 
-        let depth = 3;
+        let depth = 2;
         let move = getMove(depth);
         xCord = move[0];
         yCord = move[1];
@@ -190,7 +190,7 @@ function getMove(depth) {
                 let score = minimaxim(board, depth, false, -1.0, winScore);
                 // console.log("bbb");
 
-                if (score > bestScore) {
+                if (score >= bestScore) {
                     // console.log("Yeni ARRay");
                     // board.forEach((aa)=>console.log(aa));                    
                     bestScore = score;
@@ -204,9 +204,54 @@ function getMove(depth) {
     return move;
 }
 
+var hashTable = {};
+
+function getKey(board, isMaximizing) {
+    let key;
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            if(board[i][j])
+            key ^= board[i][j];
+        }
+    }
+    // key += isMaximizing
+
+    // console.log(key)
+    return key
+}
+
+function isBoardingTable(board, isMaximizing) {
+    let key = getKey(board, isMaximizing)
+    if (hashTable[key] != undefined){
+        return hashTable[key];
+    }
+    else {
+        return "yok";
+    }
+
+}
+
 function minimaxim(board, depth, isMaximizing, alpha, beta) {
+   
     // console.log("Girdim minimaxa");
-    if (depth == 0) {
+    // if (depth == 0) {
+    //     let ScorestBefore = isBoardingTable(board, isMaximizing)
+    //     if (ScorestBefore == "yok") 
+    //     {
+    //         let Skor = evaluateBoardForWhite(board, isMaximizing)
+    //         hashTable[getKey(board, isMaximizing)] = Skor;
+    //         return Skor;
+    //     }
+    //     else 
+    //     { 
+    //         // console.log("AASDAS");
+    //         return ScorestBefore;
+    //     }
+    // }
+
+
+    if (depth == 0 )
+    {
         return evaluateBoardForWhite(board, isMaximizing);
     }
 
@@ -220,8 +265,8 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
                     let score = minimaxim(board, depth - 1, false, alpha, beta);
                     board[i][j] = null;
                     bestScore = Math.max(score, bestScore);
-                    alpha = Math.max(alpha,bestScore)
-                    if (beta <= alpha){
+                    alpha = Math.max(alpha, score)
+                    if (beta < alpha) {
                         break;
                     }
                 }
@@ -237,11 +282,11 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
                 // Is the spot available?
                 if (board[i][j] == null) {
                     board[i][j] = "human";
-                    let score = minimaxim(board, depth - 1, true , alpha , beta);
+                    let score = minimaxim(board, depth - 1, true, alpha, beta);
                     board[i][j] = null;
                     bestScore = Math.min(score, bestScore);
-                    beta = Math.min(beta, bestScore);
-                    if (beta <= alpha){
+                    beta = Math.min(beta, score);
+                    if (beta < alpha) {
                         break;
                     }
                 }
@@ -262,12 +307,17 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
 // }
 
 function evaluateBoardForWhite(board, blacksTurn) {
+
     let blackScore = getScore(board, true, blacksTurn);
     let whiteScore = getScore(board, false, blacksTurn);
 
     if (blackScore == 0) blackScore = 1.0;
 
     return whiteScore / blackScore;
+
+    // if (whiteScore == 0) whiteScore = 1.0;
+
+    // return blackScore / whiteScore;
 }
 
 function getScore(board, forBlack, blacksTurn) {
@@ -450,9 +500,7 @@ function evaluateDiagonal(board, forBlack, playersTurn) {
 
         }
         if (consecutive > 0) {
-
             score += getConsecutiveSetScore(consecutive, blocks, flag);
-
         }
         consecutive = 0;
         blocks = 2;
@@ -467,7 +515,7 @@ function getConsecutiveSetScore(count, blocks, currentTurn) {
     if (blocks == 2 && count < 5) return 0;
     switch (count) {
         case 5: {
-            return 2000000;
+            return winScore;
         }
         case 4: {
             if (currentTurn) return winGuarantee;
@@ -499,5 +547,6 @@ function getConsecutiveSetScore(count, blocks, currentTurn) {
             return 1;
         }
     }
-    return 2000000 * 2;
+    return winScore * 2;
 }
+
