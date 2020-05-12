@@ -3,7 +3,7 @@ var ctx = canvas.getContext("2d");
 var w = canvas.width;
 var h = canvas.height;
 console.log(w, h);
-var n = 8;
+var n = 15;
 var atlama = h / n;
 
 var player = "human"
@@ -56,13 +56,12 @@ function fillTable(x, y) {
 }
 
 canvas.onmousedown = function (e) {
-
+    
     let xCord = Math.floor(e.clientY / w * n);
     let yCord = Math.floor(e.clientX / h * n);
 
     if (table[xCord][yCord] == null) {
         fillTable(xCord, yCord);
-        // conn.send(JSON.stringify([xCord, yCord]));
         table[xCord][yCord] = player;
         if (isAnyOneWin(xCord, yCord)) {
             alert(player + " oyuncusu kazandi");
@@ -70,27 +69,20 @@ canvas.onmousedown = function (e) {
         }
         console.log(table[xCord][yCord])
 
-
         player = "AI";
 
-        let depth = 2;
-        let move = getMove(depth);
+        let depth = 3;
+        let move = getMove(depth, xCord, yCord);
         xCord = move[0];
         yCord = move[1];
         table[xCord][yCord] = player;
         fillTable(xCord, yCord);
-        // console.log(table);
 
         if (isAnyOneWin(xCord, yCord)) {
             alert(player + " oyuncusu kazandi");
             window.location = window.location
         }
-
         player = "human";
-
-        // fillControl(5,5)
-
-
     }
 }
 
@@ -113,7 +105,6 @@ function isAnyOneWin(xCord, yCord) {
     let i = 0;
     for (i = -winCount + 1; i < winCount; i++) {
         let x = xCord + i;
-        // fillControl(x,yCord);
         if (x >= 0 && x < n && table[x][yCord] == player) {
             tempCount++;
             if (tempCount >= 5) {
@@ -127,7 +118,6 @@ function isAnyOneWin(xCord, yCord) {
 
     for (i = -winCount + 1; i < winCount; i++) {
         let y = yCord + i;
-        // fillControl(xCord,y);
         if (y >= 0 && y < n && table[xCord][y] == player) {
             tempCount++;
             if (tempCount >= 5) {
@@ -143,7 +133,6 @@ function isAnyOneWin(xCord, yCord) {
     for (i = -winCount + 1; i < winCount; i++) {
         let y = yCord + i
         let x = xCord + i
-        // fillControl(x,y);
         if (y >= 0 && y < n && x >= 0 && x < n && table[x][y] == player) {
             tempCount++;
             if (tempCount >= 5) {
@@ -159,7 +148,6 @@ function isAnyOneWin(xCord, yCord) {
     for (i = -winCount + 1; i < winCount; i++) {
         let y = yCord - i
         let x = xCord + i
-        // fillControl(x,y);
         if (y >= 0 && y < n && x >= 0 && x < n && table[x][y] == player) {
             tempCount++;
             if (tempCount >= 5) {
@@ -174,25 +162,27 @@ function isAnyOneWin(xCord, yCord) {
     return null;
 }
 
+let wS, wE;
+let hS, hE;
 
-function getMove(depth) {
+function getMove(depth, xCord, yCord) {
     // console.log("Basladim calismaya");
-    // AI to make its turn
+
+    hS = Math.max(xCord-5, 0);
+    hE = Math.min(xCord+5, n);
+
+    wS = Math.max(yCord-5, 0);
+    wE = Math.min(yCord+5, n);
+
     let bestScore = -Infinity;
     let move;
     let board = table
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            // Is the spot available?
+    for (let i = hS; i < hE; i++) {
+        for (let j = wS; j < wE; j++) {
             if (board[i][j] == null) {
-                // console.log("AAA");
                 board[i][j] = "AI";
                 let score = minimaxim(board, depth, false, -1.0, winScore);
-                // console.log("bbb");
-
                 if (score >= bestScore) {
-                    // console.log("Yeni ARRay");
-                    // board.forEach((aa)=>console.log(aa));                    
                     bestScore = score;
                     move = [i, j];
                 }
@@ -200,56 +190,11 @@ function getMove(depth) {
             }
         }
     }
-    // console.log(move)
     return move;
-}
-
-var hashTable = {};
-
-function getKey(board, isMaximizing) {
-    let key;
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            if(board[i][j])
-            key ^= board[i][j];
-        }
-    }
-    // key += isMaximizing
-
-    // console.log(key)
-    return key
-}
-
-function isBoardingTable(board, isMaximizing) {
-    let key = getKey(board, isMaximizing)
-    if (hashTable[key] != undefined){
-        return hashTable[key];
-    }
-    else {
-        return "yok";
-    }
-
 }
 
 function minimaxim(board, depth, isMaximizing, alpha, beta) {
    
-    // console.log("Girdim minimaxa");
-    // if (depth == 0) {
-    //     let ScorestBefore = isBoardingTable(board, isMaximizing)
-    //     if (ScorestBefore == "yok") 
-    //     {
-    //         let Skor = evaluateBoardForWhite(board, isMaximizing)
-    //         hashTable[getKey(board, isMaximizing)] = Skor;
-    //         return Skor;
-    //     }
-    //     else 
-    //     { 
-    //         // console.log("AASDAS");
-    //         return ScorestBefore;
-    //     }
-    // }
-
-
     if (depth == 0 )
     {
         return evaluateBoardForWhite(board, isMaximizing);
@@ -257,8 +202,8 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
 
     if (isMaximizing) {
         let bestScore = -Infinity;
-        for (let i = 0; i < n; i++) {
-            for (let j = 0; j < n; j++) {
+        for (let i = hS; i < hE; i++) {
+            for (let j = wS; j < wE; j++) {
                 // Is the spot available?
                 if (board[i][j] == null) {
                     board[i][j] = "AI";
@@ -267,18 +212,17 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
                     bestScore = Math.max(score, bestScore);
                     alpha = Math.max(alpha, score)
                     if (beta < alpha) {
-                        break;
+                        return bestScore;
                     }
                 }
             }
         }
-        // console.log("BestSkorMAX",bestScore)
         return bestScore;
     }
     else {
         let bestScore = Infinity;
-        for (let i = 0; i < n; i++) {
-            for (let j = 0; j < n; j++) {
+        for (let i = hS; i < hE; i++) {
+            for (let j = wS; j < wE; j++) {
                 // Is the spot available?
                 if (board[i][j] == null) {
                     board[i][j] = "human";
@@ -287,24 +231,15 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
                     bestScore = Math.min(score, bestScore);
                     beta = Math.min(beta, score);
                     if (beta < alpha) {
-                        break;
+                        return bestScore;
                     }
                 }
             }
         }
-        // console.log("BestSkorMin",bestScore)
         return bestScore;
     }
 }
 
-// function minimax(board, depth, max) {
-//     if (depth == 0) {
-//         return evaluateBoardForWhite(board, !max)
-//     }
-
-
-
-// }
 
 function evaluateBoardForWhite(board, blacksTurn) {
 
@@ -315,9 +250,6 @@ function evaluateBoardForWhite(board, blacksTurn) {
 
     return whiteScore / blackScore;
 
-    // if (whiteScore == 0) whiteScore = 1.0;
-
-    // return blackScore / whiteScore;
 }
 
 function getScore(board, forBlack, blacksTurn) {
@@ -331,15 +263,14 @@ function evaluateHorizontal(board, forBlack, playersTurn) {
     let blocks = 2;
     let score = 0;
 
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
+    for (let i = hS; i < hE; i++) {
+        for (let j = wS; j < wE; j++) {
             if (board[i][j] == (forBlack ? player1 : player2)) {
                 consecutive++;
             }
             else if (board[i][j] == null) {
                 if (consecutive > 0) {
                     blocks--;
-                    // console.log("AA");
                     score += getConsecutiveSetScore(consecutive, blocks, forBlack == playersTurn);
                     consecutive = 0;
                     blocks = 1;
@@ -367,10 +298,8 @@ function evaluateHorizontal(board, forBlack, playersTurn) {
         blocks = 2;
 
     }
-    // console.log("Score", score);
     return score;
 }
-// 
 
 let player1 = "human";
 let player2 = "AI";
@@ -380,8 +309,8 @@ function evaluateVertical(board, forBlack, playersTurn) {
     let blocks = 2;
     let score = 0;
 
-    for (let j = 0; j < n; j++) {
-        for (let i = 0; i < n; i++) {
+    for (let i = hS; i < hE; i++) {
+        for (let j = wS; j < wE; j++) {
             if (board[i][j] == (forBlack ? player1 : player2)) {
                 consecutive++;
             }
@@ -417,14 +346,12 @@ function evaluateVertical(board, forBlack, playersTurn) {
     }
     return score;
 }
-// 
 function evaluateDiagonal(board, forBlack, playersTurn) {
 
     let consecutive = 0;
     let blocks = 2;
     let score = 0;
     let flag = forBlack == playersTurn
-    // From bottom-left to top-right diagonally
     for (let k = 0; k <= 2 * (n - 1); k++) {
         let iStart = Math.max(0, k - n + 1);
         let iEnd = Math.min(n - 1, k);
@@ -465,7 +392,6 @@ function evaluateDiagonal(board, forBlack, playersTurn) {
         consecutive = 0;
         blocks = 2;
     }
-    // From top-left to bottom-right diagonally
     for (let k = 1 - n; k < n; k++) {
         let iStart = Math.max(0, k);
         let iEnd = Math.min(n + k - 1, n - 1);
@@ -508,9 +434,7 @@ function evaluateDiagonal(board, forBlack, playersTurn) {
     return score;
 }
 
-// 
 function getConsecutiveSetScore(count, blocks, currentTurn) {
-    // console.log("Count", count,"blocks", blocks,"currentTuren",currentTurn)
     let winGuarantee = 1000000;
     if (blocks == 2 && count < 5) return 0;
     switch (count) {
