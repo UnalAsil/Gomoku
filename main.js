@@ -3,7 +3,7 @@ var ctx = canvas.getContext("2d");
 var w = canvas.width;
 var h = canvas.height;
 console.log(w, h);
-var n = 15;
+var n = 15; 
 var atlama = h / n;
 
 var player = "human"
@@ -12,7 +12,7 @@ var table = Create2dArray(n)
 
 winScore = 100000000;
 
-function Create2dArray(n) {
+function Create2dArray(n) { 
     var arr = [];
     for (var i = 0; i < n; i++) {
         arr[i] = [];
@@ -27,7 +27,7 @@ console.log("Table", table)
 console.log(" Tablo 00 degeri ", table[0][0])
 createTable()
 
-function createTable() {
+function createTable() { // Tabloyu ekrana basan fonksiyon.
     for (let i = 0; i < n + 1; i++) {
         ctx.beginPath();
         ctx.moveTo(0, atlama * i);
@@ -42,7 +42,7 @@ function createTable() {
     }
 }
 
-function fillTable(x, y) {
+function fillTable(x, y) { //Yapilan hamleleri ekrana basan fonskiyon.
     let xCord = y * atlama + atlama / 2;
     let yCord = x * atlama + atlama / 2;
 
@@ -55,30 +55,30 @@ function fillTable(x, y) {
     ctx.stroke();
 }
 
-canvas.onmousedown = function (e) {
+canvas.onmousedown = function (e) { // Kullanici mouse tikladiginda oyun basliyor.
     
-    let xCord = Math.floor(e.clientY / w * n);
+    let xCord = Math.floor(e.clientY / w * n); //Kullanicnin tikladigi kordinatlar
     let yCord = Math.floor(e.clientX / h * n);
 
-    if (table[xCord][yCord] == null) {
+    if (table[xCord][yCord] == null) { 
         fillTable(xCord, yCord);
         table[xCord][yCord] = player;
-        if (isAnyOneWin(xCord, yCord)) {
+        if (isAnyOneWin(xCord, yCord)) { // Kullanicinin oyunu kazanip kazanmadigi kontrol ediliyor.
             alert(player + " oyuncusu kazandi");
             window.location = window.location
         }
         console.log(table[xCord][yCord])
 
-        player = "AI";
+        player = "AI";  //Hamle sirasi yapay zekada
 
-        let depth = 3;
-        let move = getMove(depth, xCord, yCord);
+        let depth = 2;
+        let move = getMove(depth, xCord, yCord); //Yapay zekanin hamlesi aliniyor.
         xCord = move[0];
         yCord = move[1];
         table[xCord][yCord] = player;
         fillTable(xCord, yCord);
 
-        if (isAnyOneWin(xCord, yCord)) {
+        if (isAnyOneWin(xCord, yCord)) { // Yapay zekanin oyunu kazanip kazanmadigi kontrol ediliyor.
             alert(player + " oyuncusu kazandi");
             window.location = window.location
         }
@@ -99,7 +99,7 @@ function fillControl(x, y) {
     ctx.stroke();
 }
 
-function isAnyOneWin(xCord, yCord) {
+function isAnyOneWin(xCord, yCord) { //Tahtayi dolasiyor, kazanan varsa kazanani geri donduruyor.
     let winCount = 5;
     let tempCount = 0;
     let i = 0;
@@ -168,7 +168,7 @@ let hS, hE;
 function getMove(depth, xCord, yCord) {
     // console.log("Basladim calismaya");
 
-    hS = Math.max(xCord-5, 0);
+    hS = Math.max(xCord-5, 0); // Dinamik bir pencere etrafinda hesaplamalar yapiliyor.Boylece butun tahta yerine o pencere kontrol ediliyor.
     hE = Math.min(xCord+5, n);
 
     wS = Math.max(yCord-5, 0);
@@ -181,7 +181,7 @@ function getMove(depth, xCord, yCord) {
         for (let j = wS; j < wE; j++) {
             if (board[i][j] == null) {
                 board[i][j] = "AI";
-                let score = minimaxim(board, depth, false, -1.0, winScore);
+                let score = minimaxim(board, depth, false, -1.0, winScore); // Minimax Algoritmasi.
                 if (score >= bestScore) {
                     bestScore = score;
                     move = [i, j];
@@ -195,12 +195,12 @@ function getMove(depth, xCord, yCord) {
 
 function minimaxim(board, depth, isMaximizing, alpha, beta) {
    
-    if (depth == 0 )
+    if (depth == 0 ) // Derinlik 0 olursa tahtanin skoru hesaplaniyor.
     {
-        return evaluateBoardForWhite(board, isMaximizing);
+        return evaluateBoardForWhite(board, isMaximizing); 
     }
 
-    if (isMaximizing) {
+    if (isMaximizing) { // Hareketi maximixe ediyor
         let bestScore = -Infinity;
         for (let i = hS; i < hE; i++) {
             for (let j = wS; j < wE; j++) {
@@ -210,7 +210,7 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
                     let score = minimaxim(board, depth - 1, false, alpha, beta);
                     board[i][j] = null;
                     bestScore = Math.max(score, bestScore);
-                    alpha = Math.max(alpha, score)
+                    alpha = Math.max(alpha, score) //Alpha beta budamasi
                     if (beta < alpha) {
                         return bestScore;
                     }
@@ -219,7 +219,7 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
         }
         return bestScore;
     }
-    else {
+    else { // Hareketi minimize ediyor
         let bestScore = Infinity;
         for (let i = hS; i < hE; i++) {
             for (let j = wS; j < wE; j++) {
@@ -230,7 +230,7 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
                     board[i][j] = null;
                     bestScore = Math.min(score, bestScore);
                     beta = Math.min(beta, score);
-                    if (beta < alpha) {
+                    if (beta < alpha) { //Alpha beta budamasi
                         return bestScore;
                     }
                 }
@@ -241,7 +241,7 @@ function minimaxim(board, depth, isMaximizing, alpha, beta) {
 }
 
 
-function evaluateBoardForWhite(board, blacksTurn) {
+function evaluateBoardForWhite(board, blacksTurn) { //Tahtanin skorunu hesaplaniyor.
 
     let blackScore = getScore(board, true, blacksTurn);
     let whiteScore = getScore(board, false, blacksTurn);
@@ -252,13 +252,13 @@ function evaluateBoardForWhite(board, blacksTurn) {
 
 }
 
-function getScore(board, forBlack, blacksTurn) {
+function getScore(board, forBlack, blacksTurn) { //Tahtanin skoru yatay, dikey, ve caprazlamasina incelenip skor elde ediliyor.
     return evaluateHorizontal(board, forBlack, blacksTurn) +
         evaluateVertical(board, forBlack, blacksTurn) +
         evaluateDiagonal(board, forBlack, blacksTurn);
 }
 
-function evaluateHorizontal(board, forBlack, playersTurn) {
+function evaluateHorizontal(board, forBlack, playersTurn) { //Yatay degerlendirme
     let consecutive = 0;
     let blocks = 2;
     let score = 0;
@@ -303,7 +303,7 @@ function evaluateHorizontal(board, forBlack, playersTurn) {
 
 let player1 = "human";
 let player2 = "AI";
-function evaluateVertical(board, forBlack, playersTurn) {
+function evaluateVertical(board, forBlack, playersTurn) { //Dikey degerlendirme
 
     let consecutive = 0;
     let blocks = 2;
@@ -346,7 +346,7 @@ function evaluateVertical(board, forBlack, playersTurn) {
     }
     return score;
 }
-function evaluateDiagonal(board, forBlack, playersTurn) {
+function evaluateDiagonal(board, forBlack, playersTurn) { //Capraz degerlendirme
 
     let consecutive = 0;
     let blocks = 2;
@@ -434,7 +434,7 @@ function evaluateDiagonal(board, forBlack, playersTurn) {
     return score;
 }
 
-function getConsecutiveSetScore(count, blocks, currentTurn) {
+function getConsecutiveSetScore(count, blocks, currentTurn) { //Taslarin surekliligine ve uclarinin acik olup olmamasina gore skor hesaplaniyor
     let winGuarantee = 1000000;
     if (blocks == 2 && count < 5) return 0;
     switch (count) {
