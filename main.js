@@ -27,7 +27,7 @@ console.log("Table", table)
 console.log(" Tablo 00 degeri ", table[0][0])
 createTable()
 
-function createTable() { // Tabloyu ekrana basan fonksiyon.
+function createTable() { // Tabloyu ekrana basan fonksiyon
     for (let i = 0; i < n + 1; i++) {
         ctx.beginPath();
         ctx.moveTo(0, atlama * i);
