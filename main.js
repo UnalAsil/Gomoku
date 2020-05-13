@@ -71,7 +71,7 @@ canvas.onmousedown = function (e) {
 
         player = "AI";
 
-        let depth = 3;
+        let depth = 2;
         let move = getMove(depth, xCord, yCord);
         xCord = move[0];
         yCord = move[1];
